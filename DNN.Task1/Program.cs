@@ -19,16 +19,22 @@ namespace DNN.Task1
             var config = new
             {
                 EpochsCount = 10,
-                NeuronsCount = 10,
+                HiddenLayerSize = 10,
                 CrossError = 0.005,
-                LearningRate = 0.01
+                LearningRate = 0.01f
             };
-            
+
             Stopwatch sw = new Stopwatch();
             sw.Restart();
             ImagesContainer trainIC = new ImagesContainer(trainImagesPath);
             LabelsContainer trainLC = new LabelsContainer(trainLabelsPath);
-            
+            var imageSize = trainIC.ImagesWidth * trainIC.ImagesHeight;
+
+            NeuralNetwork NN = new NeuralNetwork(imageSize, config.HiddenLayerSize, 10, config.LearningRate);
+
+
+
+
             sw.Stop();
             Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} milliseconds");
 
