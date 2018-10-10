@@ -2,50 +2,38 @@
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using DNN.Task1.DataSetContainers;
 
 namespace DNN.Task1
 {
     class Program
     {
-        static string mnistFilepath = @"..\..\..\DataSet\train-images.idx3-ubyte";
+        static string datasetPath = @"..\..\..\DataSet\";
+        static string trainImagesPath = Path.Combine(datasetPath, "train-images.idx3-ubyte");
+        static string trainLabelsPath = Path.Combine(datasetPath, "train-labels.idx1-ubyte");
+        static string testImagesPath = Path.Combine(datasetPath, "t10k-images.idx3-ubyte");
+        static string testLabelsPath = Path.Combine(datasetPath, "t10k-labels.idx1-ubyte");
+
         static void Main(string[] args)
         {
-            if (args.Length > 0) mnistFilepath = args[0];
+            var config = new
+            {
+                EpochsCount = 10,
+                NeuronsCount = 10,
+                CrossError = 0.005,
+                LearningRate = 0.01
+            };
+            
             Stopwatch sw = new Stopwatch();
-            using (BinaryReader reader = new BinaryReader(File.OpenRead(mnistFilepath)))
-            {
-                int magicNumber = BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse().ToArray(), 0);
-                int imagesCount = BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse().ToArray(), 0);
-                int imageWidth = BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse().ToArray(), 0);
-                int imageHeight = BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse().ToArray(), 0);
-                int imageSize = imageWidth * imageHeight;
+            sw.Restart();
+            ImagesContainer trainIC = new ImagesContainer(trainImagesPath);
+            LabelsContainer trainLC = new LabelsContainer(trainLabelsPath);
+            
+            sw.Stop();
+            Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} milliseconds");
 
-                //// just for doing anything
-                int[] arr = new int[imagesCount];
-                int a = 0;
-                sw.Start();
-                for (int i = 0; i < imagesCount; i++)
-                {
-                    var image = reader.ReadBytes(imageSize);
-                    arr[a++] = Sum(image);
-                }
-                sw.Stop();
 
-                Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} milliseconds");
-                Console.ReadLine();
-            }
-        }
-
-        //[MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static int Sum(byte[] arr)
-        {
-            int result = 0;
-            foreach (var item in arr)
-            {
-                result += item;
-            }
-            return result;
+            Console.ReadLine();
         }
     }
 }
