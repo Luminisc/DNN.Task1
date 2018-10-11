@@ -4,12 +4,14 @@ using System.Linq;
 using System.Diagnostics;
 using DNN.Task1.DataSetContainers;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace DNN.Task1
 {
     class Program
     {
-        static string datasetPath = @"..\..\..\DataSet\";
+        public static readonly string datasetPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"../../../DataSet/");
+        //static string datasetPath = @"..\..\..\DataSet\";
         static string trainImagesPath = Path.Combine(datasetPath, "train-images.idx3-ubyte");
         static string trainLabelsPath = Path.Combine(datasetPath, "train-labels.idx1-ubyte");
         static string testImagesPath = Path.Combine(datasetPath, "t10k-images.idx3-ubyte");
