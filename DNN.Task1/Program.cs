@@ -20,7 +20,7 @@ namespace DNN.Task1
             var config = new
             {
                 EpochsCount = 10,
-                HiddenLayerSize = 30,
+                HiddenLayerSize = 50,
                 CrossEntropyError = 0.005f,
                 LearningRate = 0.01f
             };
@@ -30,13 +30,14 @@ namespace DNN.Task1
             ImagesContainer trainIC = new ImagesContainer(trainImagesPath);
             LabelsContainer trainLC = new LabelsContainer(trainLabelsPath);
             var imageSize = trainIC.ImagesWidth * trainIC.ImagesHeight;
-
+            Console.WriteLine("Initializing of neural network...");
             NeuralNetwork NN = new NeuralNetwork(imageSize, config.HiddenLayerSize, 10, config.LearningRate);
             var combinedData = CombineImages(trainIC, trainLC);
+            Console.WriteLine("Begin training...");
             NN.Train(combinedData, config.EpochsCount, config.CrossEntropyError);
 
             sw.Stop();
-            Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} milliseconds");
+            Console.WriteLine($"Training complete in {sw.ElapsedMilliseconds} milliseconds");
 
 
             Console.ReadLine();

@@ -81,9 +81,10 @@ namespace DNN.Task1
 
             for (int i = 0; i < epochsCount; i++)
             {
+                Console.WriteLine($"[Epoch #{i + 1}]");
                 sw.Restart();
                 int correctAnswers = 0;
-                var randomizedData = combinedData.OrderBy(x => rnd.Next());
+                var randomizedData = combinedData.OrderBy(x => rnd.Next()).ToList();
 
                 foreach (var data in randomizedData)
                 {
@@ -103,14 +104,14 @@ namespace DNN.Task1
                     ChangeWeightsDeltas();
                 }
 
-                var crossEnthropy = CalculateCrossEntropy(randomizedData.ToList());
+                var crossEnthropy = CalculateCrossEntropy(randomizedData);
                 Console.WriteLine($"Cross enthropy of dataset: {crossEnthropy}");
 
-                var accuracy = correctAnswers / combinedData.Count;
+                double accuracy = correctAnswers / (double)combinedData.Count;
                 Console.WriteLine($"Accuracy: {accuracy}");
                 sw.Stop();
                 Console.WriteLine($"Epoch finished in {sw.ElapsedMilliseconds} ms.");
-
+                Console.WriteLine();
                 if ((crossEnthropy <= crossEntropyError) || (1 - accuracy <= crossEntropyError))
                     break;
             }
@@ -125,7 +126,7 @@ namespace DNN.Task1
                 for (int j = 0; j < InputLayerSize; j++)
                     sum += InputLayer[j] * HiddenWeights[j, i];
                 sum += HiddenWeightsDeltas[i];
-                HiddenLayer[i] = sum;
+                HiddenLayer[i] = 1.0 / (1.0 + Math.Exp(-sum));
             }
         }
 
@@ -146,17 +147,21 @@ namespace DNN.Task1
         protected void CalculateSoftmax()
         {
             double sum = 0;
+            double[] exponentialLayer = new double[OutputLayerSize];
             for (int i = 0; i < OutputLayerSize; i++)
-                sum += Math.Exp(OutputLayer[i]);
+            {
+                exponentialLayer[i] = Math.Exp(OutputLayer[i]);
+                sum += exponentialLayer[i];
+            }
             for (int i = 0; i < OutputLayerSize; i++)
-                OutputLayer[i] /= sum;
+                OutputLayer[i] = exponentialLayer[i] / sum;
         }
 
         public void CalculateGradient(double[] expectedOutput)
         {
             for (int i = 0; i < OutputLayerSize; i++)
                 OutputLayerGradient[i] = expectedOutput[i] - OutputLayer[i];
-            
+
             double sum = 0.0;
             for (int i = 0; i < HiddenLayerSize; i++)
             {
@@ -187,28 +192,22 @@ namespace DNN.Task1
         public double CalculateCrossEntropy(List<ImageDescription> dataCollection)
         {
             double sum = 0;
-            double[] x = new double[InputLayerSize];
-            double[] y = new double[OutputLayerSize];
-            double[] z = new double[OutputLayerSize];
-            int size = dataCollection.Count;
+            double[] expectedOutput = new double[OutputLayerSize];
 
             foreach (var data in dataCollection)
             {
-                for (int j = 0; j < InputLayerSize; j++)
-                    x[j] = data.Image[j];
+                Array.Copy(data.Image, InputLayer, InputLayerSize);
 
-                Array.Clear(z, 0, OutputLayerSize);
-                z[data.Label] = 1.0;
+                Array.Clear(expectedOutput, 0, OutputLayerSize);
+                expectedOutput[data.Label] = 1.0;
 
-                InputLayer = x;
                 CalculateHiddenLayer();
                 CalculateOutputLayer();
-                y = OutputLayer;
                 for (int i = 0; i < OutputLayerSize; i++)
-                    sum += Math.Log(y[i] * z[i]);
+                    sum += Math.Log(OutputLayer[i]) * expectedOutput[i];
             }
 
-            return -sum / size;
+            return -sum / dataCollection.Count;
         }
 
         public int IndexOfMaximum()
