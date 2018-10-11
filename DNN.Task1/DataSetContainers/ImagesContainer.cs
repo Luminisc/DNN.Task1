@@ -15,9 +15,9 @@ namespace DNN.Task1.DataSetContainers
         public int ImagesHeight { get; set; }
 
         protected Stopwatch sw = new Stopwatch();
-        public List<float[]> Images { get; protected set; }
+        public List<double[]> Images { get; protected set; }
 
-        public ImagesContainer(string filepath, bool preload = true)
+        public ImagesContainer(string filepath)
         {
             sw.Restart();
             using (var file = File.OpenRead(filepath))
@@ -34,7 +34,7 @@ namespace DNN.Task1.DataSetContainers
 
                 Images = Enumerable.Range(0, ImagesCount)
                     .Select(x => reader.ReadBytes(imageSize))
-                    .Select(x => x.Select(y => y / 255.0f).ToArray())
+                    .Select(x => x.Select(y => y / 255.0).ToArray())
                     .ToList();
             }
             sw.Stop();

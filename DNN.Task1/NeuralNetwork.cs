@@ -9,7 +9,7 @@ namespace DNN.Task1
 {
     struct ImageDescription
     {
-        public float[] Image;
+        public double[] Image;
         public byte Label;
     }
 
@@ -18,64 +18,64 @@ namespace DNN.Task1
         public int InputLayerSize { get; protected set; }
         public int HiddenLayerSize { get; protected set; }
         public int OutputLayerSize { get; protected set; }
-        public float LearningRate { get; protected set; }
+        public double LearningRate { get; protected set; }
 
-        protected float[] InputLayer { get; set; }
-        protected float[] HiddenLayer { get; set; }
-        protected float[] OutputLayer { get; set; }
+        protected double[] InputLayer { get; set; }
+        protected double[] HiddenLayer { get; set; }
+        protected double[] OutputLayer { get; set; }
 
-        protected float[] HiddenWeightsDeltas { get; set; }
-        protected float[] OutputWeightsDeltas { get; set; }
+        protected double[] HiddenWeightsDeltas { get; set; }
+        protected double[] OutputWeightsDeltas { get; set; }
 
-        protected float[] HiddenLayerGradient { get; set; }
-        protected float[] OutputLayerGradient { get; set; }
+        protected double[] HiddenLayerGradient { get; set; }
+        protected double[] OutputLayerGradient { get; set; }
 
-        protected float[,] HiddenWeights { get; set; }
-        protected float[,] OutputWeights { get; set; }
+        protected double[,] HiddenWeights { get; set; }
+        protected double[,] OutputWeights { get; set; }
 
-        public NeuralNetwork(int inputLayerSize, int hiddenLayerSize, int outputLayerSize, float learningRate)
+        public NeuralNetwork(int inputLayerSize, int hiddenLayerSize, int outputLayerSize, double learningRate)
         {
             InputLayerSize = inputLayerSize;
             HiddenLayerSize = hiddenLayerSize;
             OutputLayerSize = outputLayerSize;
             LearningRate = learningRate;
 
-            InputLayer = new float[inputLayerSize];
-            HiddenLayer = new float[hiddenLayerSize];
-            OutputLayer = new float[outputLayerSize];
+            InputLayer = new double[inputLayerSize];
+            HiddenLayer = new double[hiddenLayerSize];
+            OutputLayer = new double[outputLayerSize];
 
             Random rnd = new Random();
 
-            HiddenWeightsDeltas = new float[hiddenLayerSize];
+            HiddenWeightsDeltas = new double[hiddenLayerSize];
             for (int i = 0; i < hiddenLayerSize; i++)
             {
-                HiddenWeightsDeltas[i] = (float)((rnd.NextDouble() - 0.5) * 2.0);
+                HiddenWeightsDeltas[i] = (double)((rnd.NextDouble() - 0.5) * 2.0);
             }
-            OutputWeightsDeltas = new float[outputLayerSize];
+            OutputWeightsDeltas = new double[outputLayerSize];
             for (int i = 0; i < outputLayerSize; i++)
             {
-                OutputWeightsDeltas[i] = (float)((rnd.NextDouble() - 0.5) * 2.0);
+                OutputWeightsDeltas[i] = (double)((rnd.NextDouble() - 0.5) * 2.0);
             }
 
-            HiddenLayerGradient = new float[hiddenLayerSize];
+            HiddenLayerGradient = new double[hiddenLayerSize];
             Array.Clear(HiddenLayerGradient, 0, hiddenLayerSize);
-            OutputLayerGradient = new float[outputLayerSize];
+            OutputLayerGradient = new double[outputLayerSize];
             Array.Clear(OutputLayerGradient, 0, outputLayerSize);
 
-            HiddenWeights = new float[inputLayerSize, hiddenLayerSize];
+            HiddenWeights = new double[inputLayerSize, hiddenLayerSize];
             for (int i = 0; i < inputLayerSize; i++)
                 for (int j = 0; j < hiddenLayerSize; j++)
-                    HiddenWeights[i, j] = (float)((rnd.NextDouble() - 0.5) * 2.0);
-            OutputWeights = new float[hiddenLayerSize, outputLayerSize];
+                    HiddenWeights[i, j] = (double)((rnd.NextDouble() - 0.5) * 2.0);
+            OutputWeights = new double[hiddenLayerSize, outputLayerSize];
             for (int i = 0; i < hiddenLayerSize; i++)
                 for (int j = 0; j < outputLayerSize; j++)
-                    OutputWeights[i, j] = (float)((rnd.NextDouble() - 0.5) * 2.0);
+                    OutputWeights[i, j] = (double)((rnd.NextDouble() - 0.5) * 2.0);
         }
 
-        public void Train(List<ImageDescription> combinedData, int epochsCount, float crossEntropyError)
+        public void Train(List<ImageDescription> combinedData, int epochsCount, double crossEntropyError)
         {
-            var expectedOutput = new float[OutputLayerSize];
-            
+            var expectedOutput = new double[OutputLayerSize];
+
             Random rnd = new Random();
             Stopwatch sw = new Stopwatch();
 
@@ -89,12 +89,12 @@ namespace DNN.Task1
                 {
                     Array.Copy(data.Image, InputLayer, InputLayerSize);
                     Array.Clear(expectedOutput, 0, OutputLayerSize);
-                    expectedOutput[data.Label] = 1.0f;
+                    expectedOutput[data.Label] = 1.0;
 
                     CalculateHiddenLayer();
                     CalculateOutputLayer();
 
-                    if (expectedOutput[IndexOfMaximum()] > 0.0f)
+                    if (expectedOutput[IndexOfMaximum()] > 0.0)
                         correctAnswers++;
 
                     CalculateGradient(expectedOutput);
@@ -118,10 +118,10 @@ namespace DNN.Task1
 
         protected void CalculateHiddenLayer()
         {
-            float sum = 0.0f;
+            double sum = 0.0;
             for (int i = 0; i < HiddenLayerSize; i++)
             {
-                sum = 0.0f;
+                sum = 0.0;
                 for (int j = 0; j < InputLayerSize; j++)
                     sum += InputLayer[j] * HiddenWeights[j, i];
                 sum += HiddenWeightsDeltas[i];
@@ -131,10 +131,10 @@ namespace DNN.Task1
 
         protected void CalculateOutputLayer()
         {
-            float sum = 0.0f;
+            double sum = 0.0;
             for (int i = 0; i < OutputLayerSize; i++)
             {
-                sum = 0.0f;
+                sum = 0.0;
                 for (int j = 0; j < HiddenLayerSize; j++)
                     sum += HiddenLayer[j] * OutputWeights[j, i];
                 sum += OutputWeightsDeltas[i];
@@ -145,23 +145,19 @@ namespace DNN.Task1
 
         protected void CalculateSoftmax()
         {
-            float sum = 0;
+            double sum = 0;
             for (int i = 0; i < OutputLayerSize; i++)
-            {
-                sum += MathF.Exp(OutputLayer[i]);
-            }
+                sum += Math.Exp(OutputLayer[i]);
             for (int i = 0; i < OutputLayerSize; i++)
-            {
                 OutputLayer[i] /= sum;
-            }
         }
 
-        public void CalculateGradient(float[] expectedOutput)
+        public void CalculateGradient(double[] expectedOutput)
         {
             for (int i = 0; i < OutputLayerSize; i++)
                 OutputLayerGradient[i] = expectedOutput[i] - OutputLayer[i];
-
-            float sum = 0.0f;
+            
+            double sum = 0.0;
             for (int i = 0; i < HiddenLayerSize; i++)
             {
                 for (int j = 0; j < OutputLayerSize; j++)
@@ -188,12 +184,12 @@ namespace DNN.Task1
                 HiddenWeightsDeltas[i] += LearningRate * HiddenLayerGradient[i];
         }
 
-        public float CalculateCrossEntropy(List<ImageDescription> dataCollection)
+        public double CalculateCrossEntropy(List<ImageDescription> dataCollection)
         {
-            float sum = 0;
-            float[] x = new float[InputLayerSize];
-            float[] y = new float[OutputLayerSize];
-            float[] z = new float[OutputLayerSize];
+            double sum = 0;
+            double[] x = new double[InputLayerSize];
+            double[] y = new double[OutputLayerSize];
+            double[] z = new double[OutputLayerSize];
             int size = dataCollection.Count;
 
             foreach (var data in dataCollection)
@@ -202,14 +198,14 @@ namespace DNN.Task1
                     x[j] = data.Image[j];
 
                 Array.Clear(z, 0, OutputLayerSize);
-                z[data.Label] = 1.0f;
+                z[data.Label] = 1.0;
 
                 InputLayer = x;
                 CalculateHiddenLayer();
                 CalculateOutputLayer();
                 y = OutputLayer;
                 for (int i = 0; i < OutputLayerSize; i++)
-                    sum += MathF.Log(y[i] * z[i]);
+                    sum += Math.Log(y[i] * z[i]);
             }
 
             return -sum / size;
@@ -218,7 +214,7 @@ namespace DNN.Task1
         public int IndexOfMaximum()
         {
             int index = 0;
-            float val = float.MinValue;
+            double val = double.MinValue;
             for (int i = 0; i < OutputLayerSize; i++)
                 if (OutputLayer[i] > val)
                 {
