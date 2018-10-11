@@ -11,7 +11,7 @@ namespace DNN.Task1.DataSetContainers
     class LabelsContainer
     {
         public int LabelsCount { get; set; }
-        public byte[] Labels { get; set; }
+        public byte[] Labels { get; protected set; }
 
         protected Stopwatch sw = new Stopwatch();        
 
@@ -31,7 +31,5 @@ namespace DNN.Task1.DataSetContainers
             sw.Stop();
             Console.WriteLine($"Labels file loaded in {sw.ElapsedMilliseconds} ms.");
         }
-
-
     }
 }

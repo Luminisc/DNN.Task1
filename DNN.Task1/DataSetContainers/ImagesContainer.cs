@@ -15,7 +15,7 @@ namespace DNN.Task1.DataSetContainers
         public int ImagesHeight { get; set; }
 
         protected Stopwatch sw = new Stopwatch();
-        protected float[] images;
+        public List<float[]> Images { get; protected set; }
 
         public ImagesContainer(string filepath, bool preload = true)
         {
@@ -32,13 +32,13 @@ namespace DNN.Task1.DataSetContainers
                 ImagesHeight = BitConverter.ToInt32(reader.ReadBytes(sizeof(int)).Reverse().ToArray(), 0);
                 var imageSize = ImagesWidth * ImagesHeight;
 
-                var buffer = reader.ReadBytes(imageSize * ImagesCount);
-                images = buffer.Select(x => x / 255.0f).ToArray();
+                Images = Enumerable.Range(0, ImagesCount)
+                    .Select(x => reader.ReadBytes(imageSize))
+                    .Select(x => x.Select(y => y / 255.0f).ToArray())
+                    .ToList();
             }
             sw.Stop();
             Console.WriteLine($"Images file loaded in {sw.ElapsedMilliseconds} ms.");
         }
-
-
     }
 }

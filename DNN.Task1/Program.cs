@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Diagnostics;
 using DNN.Task1.DataSetContainers;
+using System.Collections.Generic;
 
 namespace DNN.Task1
 {
@@ -19,8 +20,8 @@ namespace DNN.Task1
             var config = new
             {
                 EpochsCount = 10,
-                HiddenLayerSize = 10,
-                CrossError = 0.005,
+                HiddenLayerSize = 30,
+                CrossEntropyError = 0.005f,
                 LearningRate = 0.01f
             };
 
@@ -31,15 +32,24 @@ namespace DNN.Task1
             var imageSize = trainIC.ImagesWidth * trainIC.ImagesHeight;
 
             NeuralNetwork NN = new NeuralNetwork(imageSize, config.HiddenLayerSize, 10, config.LearningRate);
-
-
-
+            var combinedData = CombineImages(trainIC, trainLC);
+            NN.Train(combinedData, config.EpochsCount, config.CrossEntropyError);
 
             sw.Stop();
             Console.WriteLine($"Elapsed: {sw.ElapsedMilliseconds} milliseconds");
 
 
             Console.ReadLine();
+        }
+
+        static List<ImageDescription> CombineImages(ImagesContainer trainIC, LabelsContainer trainLC)
+        {
+            var ret = new List<ImageDescription>();
+            for (int i = 0; i < trainIC.ImagesCount; i++)
+            {
+                ret.Add(new ImageDescription() { Image = trainIC.Images[i], Label = trainLC.Labels[i] });
+            }
+            return ret;
         }
     }
 }
