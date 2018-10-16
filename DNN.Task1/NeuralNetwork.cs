@@ -105,16 +105,56 @@ namespace DNN.Task1
                 }
 
                 var crossEnthropy = CalculateCrossEntropy(randomizedData);
-                Console.WriteLine($"Cross enthropy of dataset: {crossEnthropy}");
+                Console.WriteLine($"Cross entropy of dataset:\r\n\t{crossEnthropy}");
 
                 double accuracy = correctAnswers / (double)combinedData.Count;
-                Console.WriteLine($"Accuracy: {accuracy}");
+                Console.WriteLine($"Accuracy:\r\n\t{accuracy}");
                 sw.Stop();
-                Console.WriteLine($"Epoch finished in {sw.ElapsedMilliseconds} ms.");
+                Console.WriteLine($"Epoch finished in\r\n\t{sw.ElapsedMilliseconds} ms.");
                 Console.WriteLine();
                 if ((crossEnthropy <= crossEntropyError) || (1 - accuracy <= crossEntropyError))
                     break;
             }
+        }
+
+        public void Test(List<ImageDescription> combinedData, double crossEntropyError)
+        {
+            var expectedOutput = new double[OutputLayerSize];
+
+            Random rnd = new Random();
+            Stopwatch sw = new Stopwatch();
+
+            Console.WriteLine($"[Testing data...]");
+            sw.Restart();
+            int correctAnswers = 0;
+            var randomizedData = combinedData.OrderBy(x => rnd.Next()).ToList();
+
+            foreach (var data in randomizedData)
+            {
+                Array.Copy(data.Image, InputLayer, InputLayerSize);
+                Array.Clear(expectedOutput, 0, OutputLayerSize);
+                expectedOutput[data.Label] = 1.0;
+
+                CalculateHiddenLayer();
+                CalculateOutputLayer();
+
+                if (expectedOutput[IndexOfMaximum()] > 0.0)
+                    correctAnswers++;
+
+                CalculateGradient(expectedOutput);
+
+                ChangeWeights();
+                ChangeWeightsDeltas();
+            }
+
+            var crossEnthropy = CalculateCrossEntropy(randomizedData);
+            Console.WriteLine($"Cross entropy of dataset:\r\n\t{crossEnthropy}");
+
+            double accuracy = correctAnswers / (double)combinedData.Count;
+            Console.WriteLine($"Accuracy:\r\n\t{accuracy}");
+            sw.Stop();
+            Console.WriteLine($"Testing finished in\r\n\t{sw.ElapsedMilliseconds} ms.");
+            Console.WriteLine();
         }
 
         protected void CalculateHiddenLayer()
@@ -126,7 +166,7 @@ namespace DNN.Task1
                 for (int j = 0; j < InputLayerSize; j++)
                     sum += InputLayer[j] * HiddenWeights[j, i];
                 sum += HiddenWeightsDeltas[i];
-                HiddenLayer[i] = 1.0 / (1.0 + Math.Exp(-sum));
+                HiddenLayer[i] = 1.0 / (1.0 + Math.Exp(-sum));  //Activation function 1/(1 + Exp(-x))
             }
         }
 

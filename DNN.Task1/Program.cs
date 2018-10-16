@@ -26,21 +26,28 @@ namespace DNN.Task1
                 CrossEntropyError = 0.005f,
                 LearningRate = 0.01f
             };
-
             Stopwatch sw = new Stopwatch();
-            sw.Restart();
+            sw.Start();
+
             ImagesContainer trainIC = new ImagesContainer(trainImagesPath);
             LabelsContainer trainLC = new LabelsContainer(trainLabelsPath);
             var imageSize = trainIC.ImagesWidth * trainIC.ImagesHeight;
+
             Console.WriteLine("Initializing of neural network...");
             NeuralNetwork NN = new NeuralNetwork(imageSize, config.HiddenLayerSize, 10, config.LearningRate);
+
             var combinedData = CombineImages(trainIC, trainLC);
             Console.WriteLine("Begin training...");
             NN.Train(combinedData, config.EpochsCount, config.CrossEntropyError);
-
             sw.Stop();
             Console.WriteLine($"Training complete in {sw.ElapsedMilliseconds} milliseconds");
+            Console.WriteLine("\r\n______________________________\r\n");
 
+            ImagesContainer testIC = new ImagesContainer(testImagesPath);
+            LabelsContainer testLC = new LabelsContainer(testLabelsPath);
+            var combinedTestData = CombineImages(testIC, testLC);
+            Console.WriteLine("Begin training...");
+            NN.Test(combinedTestData, config.CrossEntropyError);
 
             Console.ReadLine();
         }
